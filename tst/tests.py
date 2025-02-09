@@ -2,7 +2,12 @@ from django.utils import timezone
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import Post, Profile, FollowersCount
+from ..src.core.models import Post, Profile, FollowersCount
+
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
 class UserViewsTestCase(TestCase):
 

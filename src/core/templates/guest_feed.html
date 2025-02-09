@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Guest Feed</h2>
+  <p>
+    Please <a href="{% url 'login' %}">login</a> or <a href="{% url 'signup' %}">signup</a> to interact with posts.
+  </p>
+{% endblock %}
