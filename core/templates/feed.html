@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Feed</h2>
+
+  {% if posts %}
+    {% for post in posts %}
+      <div class="card mb-3">
+        <div class="card-body">
+          <p class="card-text">{{ post.content }}</p>
+          <p class="text-muted">
+            Posted by: <a href="{% url 'user_profile' post.user %}">@{{ post.user }}</a> 
+            on {{ post.created_at|date:"M d, Y - H:i" }}
+          </p>
+
+          <!-- Like Button -->
+          <a href="{% url 'like' post.pk %}" 
+             class="btn btn-sm {% if request.user in post.liked_posts.all %}btn-danger{% else %}btn-outline-secondary{% endif %}">
+            {% if request.user in post.liked_posts.all %} Unlike {% else %} Like {% endif %}
+            ({{ post.liked_posts.count }})
+          </a>
+
+          <!-- Comment Button -->
+          <a href="{% url 'comment_create' post.pk %}" class="btn btn-sm btn-primary">Comment</a>
+
+          <!-- Delete Post (Only Visible to Owner) -->
+          {% if request.user.username == post.user %}
+            <a href="{% url 'post_delete' post.pk %}" class="btn btn-sm btn-danger">Delete</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Display Comments for the Post -->
+      <div class="card-footer">
+        <h5>Comments</h5>
+        {% if post.comments.exists %}
+          {% for comment in post.comments.all %}
+            <div class="card mb-2">
+              <div class="card-body">
+                <p class="card-text">{{ comment.content }}</p>
+                <p class="card-text">Posted by: {{ comment.user.username }} on {{ comment.created_at }}</p>
+                {% if comment.user == request.user %}
+                  <a href="{% url 'comment_delete' comment.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p>No comments yet.</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="text-muted">You are not following anyone yet or no new posts available.</p>
+  {% endif %}
+
+{% endblock %}

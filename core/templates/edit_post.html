@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load bootstrap5 %}  <!-- Load the bootstrap tag library -->
+
+{% block content %}
+  <h2>Edit Post</h2>
+
+  <!-- Displaying the form for editing the post -->
+  <form method="post">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+  </form>
+
+  <!-- Cancel button to go back to the feed -->
+  <a href="{% url 'feed' %}" class="btn btn-secondary mt-2">Cancel</a>
+{% endblock %}

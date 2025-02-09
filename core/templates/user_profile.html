@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <!-- Profile Section -->
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-body text-center">
+                <h3 class="mt-3">@{{ profile_user.username }}</h3>
+                {% if profile.location %}
+                <h4 class="text-muted">📍 {{ profile.location }}</h4>
+                {% endif %}
+                <p class="text-muted">{{ profile.bio }}</p>
+
+                <!-- Follow/Unfollow Button -->
+                {% if request.user.is_authenticated and request.user != profile_user %}
+                {% if is_following %}
+                <a href="{% url 'unfollow_user' profile_user.username %}" class="btn btn-danger btn-sm">Unfollow</a>
+                {% else %}
+                <a href="{% url 'follow_user' profile_user.username %}" class="btn btn-primary btn-sm">Follow</a>
+                {% endif %}
+                {% endif %}
+
+                <!-- Edit Profile Button (Visible only to profile owner) -->
+                {% if request.user == profile_user %}
+                <a href="{% url 'edit_profile' %}" class="btn btn-outline-secondary btn-sm">Edit Profile</a>
+                {% endif %}
+
+                <hr>
+                <p><strong>Followers:</strong> {{ followers }}</p>
+                <p><strong>Following:</strong> {{ following }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Posts & Liked Posts Section -->
+    <div class="col-md-8">
+        <h4>Posts</h4>
+        {% for post in posts %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <p class="card-text">{{ post.content }}</p>
+                <p class="text-muted">Posted on {{ post.created_at|date:"M d, Y - H:i" }}</p>
+
+                <!-- Like Button -->
+                <a href="{% url 'like' post.pk %}"
+                    class="btn btn-sm {% if request.user in post.liked_posts.all %}btn-danger{% else %}btn-outline-secondary{% endif %}">
+                    {% if request.user in post.liked_posts.all %} Unlike {% else %} Like {% endif %}
+                    ({{ post.liked_posts.count }})
+                </a>
+
+                <!-- Edit Button (Visible only to the post owner) -->
+                {% if request.user.username == post.user %}
+                <a href="{% url 'post_edit' post.pk %}" class="btn btn-sm btn-outline-warning">Edit</a>
+                {% endif %}
+
+                <!-- Delete Button (Visible only to the post owner) -->
+                {% if request.user.username == post.user %}
+                <a href="{% url 'post_delete' post.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-muted">No posts yet.</p>
+        {% endfor %}
+    </div>
+
+
+    <!-- Liked Posts Section -->
+    <h4 class="mt-4">Liked Posts</h4>
+    {% for post in liked_posts %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <p class="card-text">{{ post.content }}</p>
+            <p class="text-muted">
+                Posted by: <a href="{% url 'user_profile' post.user %}">@{{ post.user }}</a>
+                on {{ post.created_at|date:"M d, Y - H:i" }}
+            </p>
+
+            <!-- Unlike Button -->
+            <a href="{% url 'like' post.pk %}" class="btn btn-sm btn-outline-danger">Unlike</a>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-muted">No liked posts yet.</p>
+    {% endfor %}
+</div>
+</div>
+{% endblock %}

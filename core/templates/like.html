@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card mb-3">
+    <div class="card-body">
+        <p class="card-text">{{ post.content }}</p>
+        <p class="card-text text-muted">
+            Posted by:
+            <a href="{% url 'user_profile' post.user %}">@{{ post.user }}</a>
+            • {{ post.created_at|date:"M d, Y - H:i" }}
+        </p>
+
+        <div class="d-flex justify-content-between align-items-center">
+            <p class="card-text"><strong>Likes:</strong> {{ post.liked_posts.count }}</p>
+            <a href="{% url 'like' post.pk %}" 
+                class="btn btn-sm {% if request.user in post.liked_posts.all %}btn-danger{% else %}btn-outline-secondary{% endif %}">
+                {% if request.user in post.liked_posts.all %} Unlike {% else %} Like {% endif %}
+            </a>
+        </div>
+    </div>
+</div>
+
+<a href="{% url 'feed' %}" class="btn btn-primary">Back to Feed</a>
+{% endblock %}
