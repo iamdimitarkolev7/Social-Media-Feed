@@ -6,12 +6,14 @@ from django.contrib.auth.models import User
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from django.db.models import Q
+from django.http import HttpRequest, HttpResponse
+from typing import Optional
 
-from .models import Post, Comment, LikePost, Profile, FollowersCount
+from .models import Post, Comment, Profile, FollowersCount
 from .forms import PostForm, CommentForm, ProfileEditForm
 
 # Signup View
-def signup(request):
+def signup(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
@@ -23,8 +25,8 @@ def signup(request):
         form = UserCreationForm()
     return render(request, 'signup.html', {'form': form})
 
-# Login View 
-def login_view(request):
+# Login View
+def login_view(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
@@ -35,14 +37,14 @@ def login_view(request):
         form = AuthenticationForm()
     return render(request, 'login.html', {'form': form})
 
-# Logout View 
+# Logout View
 @login_required
-def logout_view(request):
+def logout_view(request: HttpRequest) -> HttpResponse:
     logout(request)
     return redirect('login')
 
 # Feed View
-def feed(request):
+def feed(request: HttpRequest) -> HttpResponse:
     posts = Post.objects.all().order_by('-created_at')
 
     if request.user.is_authenticated:
@@ -52,20 +54,16 @@ def feed(request):
         posts = followed_posts | user_posts
         posts = posts.order_by('-created_at')
         return render(request, 'feed.html', {'posts': posts})
-
     else:
         return render(request, 'guest_feed.html', {'posts': posts})
 
-
 # Create Post
 @login_required
-def post_create(request):
+def post_create(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         form = PostForm(request.POST)
         if form.is_valid():
             post = form.save(commit=False)
-            print(request)
-            print(request.user)
             post.user = request.user
             post.save()
             return redirect('feed')
@@ -75,7 +73,7 @@ def post_create(request):
     return render(request, 'post_create.html', {'form': form})
 
 @login_required
-def post_edit(request, pk):
+def post_edit(request: HttpRequest, pk: int) -> HttpResponse:
     post = get_object_or_404(Post, id=pk)
 
     if post.user != request.user.username:
@@ -93,10 +91,9 @@ def post_edit(request, pk):
 
     return render(request, 'edit_post.html', {'form': form, 'post': post})
 
-
 # Delete Post
 @login_required
-def post_delete(request, pk):
+def post_delete(request: HttpRequest, pk: int) -> HttpResponse:
     post = get_object_or_404(Post, id=pk, user=request.user.username)
 
     if request.method == 'POST':
@@ -108,7 +105,7 @@ def post_delete(request, pk):
 
 # Create Comment
 @login_required
-def comment_create(request, pk):
+def comment_create(request: HttpRequest, pk: int) -> HttpResponse:
     post = get_object_or_404(Post, id=pk)
     if request.method == 'POST':
         form = CommentForm(request.POST)
@@ -124,14 +121,14 @@ def comment_create(request, pk):
 
 # Delete Comment
 @login_required
-def comment_delete(request, pk):
+def comment_delete(request: HttpRequest, pk: int) -> HttpResponse:
     comment = get_object_or_404(Comment, pk=pk, user=request.user)
     comment.delete()
     return redirect('feed')
 
 # Like a Post
 @login_required
-def like(request, pk):
+def like(request: HttpRequest, pk: int) -> HttpResponse:
     post = get_object_or_404(Post, id=pk)
     if request.user in post.liked_posts.all():
         post.liked_posts.remove(request.user)
@@ -141,7 +138,7 @@ def like(request, pk):
     return redirect('feed')
 
 # Profile View
-def user_profile(request, username):
+def user_profile(request: HttpRequest, username: str) -> HttpResponse:
     profile_user = get_object_or_404(User, username=username)
     profile, created = Profile.objects.get_or_create(user=profile_user)
 
@@ -167,16 +164,15 @@ def user_profile(request, username):
     }
     return render(request, 'user_profile.html', context)
 
-
 # Guest Profile View
-def guest_profile(request, username):
+def guest_profile(request: HttpRequest, username: str) -> HttpResponse:
     profile_user = get_object_or_404(User, username=username)
     posts = Post.objects.filter(user=username)
     return render(request, 'guest_profile.html', {'profile_user': profile_user, 'posts': posts})
 
 # Edit Profile View
 @login_required
-def edit_profile(request):
+def edit_profile(request: HttpRequest) -> HttpResponse:
     profile, created = Profile.objects.get_or_create(user=request.user)
 
     if request.method == 'POST':
@@ -195,8 +191,7 @@ def edit_profile(request):
 
 # Follow User
 @login_required
-def follow_user(request, username):
-    """Allows the logged-in user to follow another user."""
+def follow_user(request: HttpRequest, username: str) -> HttpResponse:
     user_to_follow = get_object_or_404(User, username=username)
 
     if user_to_follow == request.user:
@@ -216,7 +211,7 @@ def follow_user(request, username):
     return redirect('user_profile', username=username)
 
 @login_required
-def unfollow_user(request, username):
+def unfollow_user(request: HttpRequest, username: str) -> HttpResponse:
     user_to_unfollow = get_object_or_404(User, username=username)
 
     follow = FollowersCount.objects.filter(follower=request.user, user=user_to_unfollow)
@@ -230,7 +225,7 @@ def unfollow_user(request, username):
     return redirect('user_profile', username=username)
 
 # Search Users
-def search_users(request):
+def search_users(request: HttpRequest) -> HttpResponse:
     query = request.GET.get('q', '')
     users = User.objects.filter(Q(username__icontains=query))
     return render(request, 'search_users.html', {'users': users, 'query': query})

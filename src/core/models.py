@@ -8,7 +8,7 @@ class Profile(models.Model):
     bio = models.TextField(blank=True)
     location = models.CharField(max_length=100, blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.user.username
 
 class Post(models.Model):
@@ -19,7 +19,7 @@ class Post(models.Model):
     num_of_likes = models.IntegerField(default=0)
     liked_posts = models.ManyToManyField(User, through='LikePost', related_name='liked_posts')
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.user
 
 class Comment(models.Model):
@@ -29,19 +29,19 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user.username} - {self.content[:20]}..."
 
 class LikePost(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likeposts')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user.username} liked {self.post.content[:20]}"
 
 class FollowersCount(models.Model):
     follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name="following")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="followers")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.follower.username} follows {self.user.username}"
