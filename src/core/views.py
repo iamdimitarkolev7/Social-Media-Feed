@@ -7,7 +7,6 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
-from typing import Optional
 
 from .models import Post, Comment, Profile, FollowersCount
 from .forms import PostForm, CommentForm, ProfileEditForm

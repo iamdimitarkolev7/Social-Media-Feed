@@ -1,10 +1,10 @@
 # core/urls.py
 
 from django.http import HttpResponsePermanentRedirect, HttpResponseRedirect
-from django.urls import path, re_path
-from . import views
-
+from django.urls import path
 from django.shortcuts import redirect
+
+from . import views
 
 def redirect_to_feed(request) -> (HttpResponseRedirect | HttpResponsePermanentRedirect):
     return redirect('feed')
